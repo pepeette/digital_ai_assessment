@@ -1,0 +1,512 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AI Readiness Assessment</title>
+<meta name="description" content="A free 4-minute assessment of your company’s AI readiness across six areas, with a personal action plan.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<!-- Optional free analytics (privacy-friendly): paste your GoatCounter or Cloudflare Web Analytics snippet here. -->
+<style>
+  :root {
+    --bg: #EEF2F1; --surface: #FFFFFF; --ink: #14213D; --muted: #55627A;
+    --line: #D3DBDA; --accent: #0F6B66; --accent-ink: #FFFFFF; --soft: #DCEBE8;
+    --warn: #9A3412; --warn-soft: #FBE9DF;
+    --l1: #C9D8D5; --l2: #93BBB5; --l3: #4E9A90; --l4: #0F6B66;
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #0E1A24; --surface: #15232F; --ink: #E6EEF0; --muted: #9FB0BA;
+      --line: #2A3B48; --accent: #4FB3A8; --accent-ink: #0B1720; --soft: #1C3437;
+      --warn: #F4A27A; --warn-soft: #3A2419;
+      --l1: #2B4249; --l2: #3C6A69; --l3: #3F8F86; --l4: #4FB3A8;
+      color-scheme: dark;
+    }
+  }
+  * { box-sizing: border-box; }
+  html { height: 100%; }
+  body {
+    margin: 0; min-height: 100%; background: var(--bg); color: var(--ink);
+    font-family: "Instrument Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+    font-size: 17px; line-height: 1.55;
+    padding: env(safe-area-inset-top, 0px) 16px env(safe-area-inset-bottom, 0px);
+  }
+  .wrap { max-width: 680px; margin: 0 auto; padding: 32px 0 48px; }
+  .brand { font-weight: 600; color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+  .panel { background: var(--surface); border: 1px solid var(--line); border-radius: 14px; padding: 32px; }
+  @media (max-width: 560px) { .panel { padding: 22px; } body { font-size: 16px; } }
+  h1 { font-size: clamp(30px, 6vw, 44px); line-height: 1.08; letter-spacing: -0.02em; margin: 0 0 16px; font-weight: 700; }
+  h2 { font-size: 24px; line-height: 1.25; margin: 0 0 10px; letter-spacing: -0.01em; }
+  h3 { font-size: 18px; margin: 0 0 12px; }
+  p { margin: 0 0 16px; }
+  .muted { color: var(--muted); }
+  .small { font-size: 14px; }
+  .facts { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 20px 0 28px; padding: 0; list-style: none; color: var(--muted); font-size: 15px; }
+  .facts strong { color: var(--ink); }
+  .btn {
+    display: inline-block; border: 0; border-radius: 10px; padding: 14px 24px; cursor: pointer;
+    background: var(--accent); color: var(--accent-ink); font: inherit; font-weight: 600; text-decoration: none;
+  }
+  .btn:hover { filter: brightness(1.08); }
+  .btn:disabled { opacity: .6; cursor: wait; }
+  .btn-quiet { background: none; color: var(--muted); padding: 8px 0; font-weight: 500; border: 0; cursor: pointer; font: inherit; text-decoration: underline; }
+  :focus-visible { outline: 3px solid var(--accent); outline-offset: 2px; }
+  [hidden] { display: none !important; }
+
+  /* Quiz */
+  .progress-row { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; color: var(--muted); margin-bottom: 8px; }
+  .progress { height: 6px; background: var(--soft); border-radius: 3px; overflow: hidden; margin-bottom: 28px; }
+  .progress > div { height: 100%; width: 0; background: var(--accent); transition: width .3s ease; }
+  .area { color: var(--accent); font-weight: 600; font-size: 15px; margin-bottom: 6px; }
+  .help { color: var(--muted); font-size: 15px; margin-bottom: 20px; }
+  .options { display: grid; gap: 10px; }
+  .opt {
+    text-align: left; width: 100%; padding: 14px 16px; border-radius: 10px; cursor: pointer;
+    background: var(--surface); color: var(--ink); border: 1.5px solid var(--line); font: inherit; line-height: 1.4;
+  }
+  .opt:hover { border-color: var(--accent); }
+  .opt[aria-pressed="true"] { border-color: var(--accent); background: var(--soft); }
+  .opt.dk { color: var(--muted); border-style: dashed; }
+  .quiz-nav { margin-top: 20px; min-height: 40px; }
+
+  /* Maturity track: the one bold element */
+  .track { margin: 24px 0 8px; }
+  .track-bar { position: relative; display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; height: 16px; }
+  .track-bar span { border-radius: 3px; }
+  .track-bar span:nth-child(1) { background: var(--l1); }
+  .track-bar span:nth-child(2) { background: var(--l2); }
+  .track-bar span:nth-child(3) { background: var(--l3); }
+  .track-bar span:nth-child(4) { background: var(--l4); }
+  .marker { position: absolute; top: -8px; width: 4px; height: 32px; background: var(--ink); border-radius: 2px; transform: translateX(-50%); transition: left .8s cubic-bezier(.2,.8,.2,1); }
+  .track-labels { display: grid; grid-template-columns: repeat(4, 1fr); gap: 4px; margin-top: 10px; font-size: 13px; color: var(--muted); }
+  .track-labels .on { color: var(--ink); font-weight: 700; }
+  .score-line { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .score-big { font-size: 64px; font-weight: 700; line-height: 1; letter-spacing: -0.03em; }
+  .score-of { color: var(--muted); font-size: 18px; }
+  .level-name { font-size: 22px; font-weight: 600; }
+
+  /* Form */
+  form { margin-top: 24px; display: grid; gap: 16px; }
+  label.field { display: grid; gap: 6px; font-weight: 500; font-size: 15px; }
+  input[type=text], input[type=email] {
+    font: inherit; padding: 12px 14px; border-radius: 10px; border: 1.5px solid var(--line);
+    background: var(--surface); color: var(--ink); width: 100%;
+  }
+  input[type=text]:focus, input[type=email]:focus { border-color: var(--accent); outline: none; }
+  .check { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; font-size: 14px; color: var(--muted); }
+  .check input { width: 18px; height: 18px; margin-top: 2px; accent-color: var(--accent); }
+  .hp { position: absolute; left: -9999px; width: 1px; height: 1px; overflow: hidden; }
+
+  /* Results */
+  .section { margin-top: 32px; padding-top: 24px; border-top: 1px solid var(--line); }
+  .dim-row { display: grid; grid-template-columns: 110px 1fr 44px; gap: 12px; align-items: center; margin-bottom: 12px; font-size: 15px; }
+  .dim-bar { height: 10px; background: var(--soft); border-radius: 5px; overflow: hidden; }
+  .dim-bar > div { height: 100%; background: var(--accent); border-radius: 5px; }
+  .dim-row.weak .dim-bar > div { background: var(--warn); }
+  .dim-val { text-align: right; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .actions { list-style: none; padding: 0; margin: 0; display: grid; gap: 14px; counter-reset: a; }
+  .actions li { display: grid; grid-template-columns: 32px 1fr; gap: 12px; counter-increment: a; }
+  .actions li::before { content: counter(a); width: 28px; height: 28px; border-radius: 50%; background: var(--ink); color: var(--surface); display: grid; place-items: center; font-weight: 700; font-size: 14px; }
+  .actions .tag { display: block; font-size: 13px; color: var(--muted); font-weight: 600; }
+  .note { background: var(--warn-soft); color: var(--ink); border-radius: 10px; padding: 12px 14px; font-size: 15px; margin-top: 16px; }
+  .note.ok { background: var(--soft); }
+  footer { margin-top: 20px; font-size: 13px; color: var(--muted); }
+  footer a { color: var(--muted); }
+  @media (prefers-reduced-motion: reduce) { * { transition: none !important; } }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="brand" id="brand">Your Company</div>
+  <main class="panel">
+
+    <!-- 1. INTRO -->
+    <section id="screen-intro">
+      <h1>How ready is your company for AI?</h1>
+      <p class="muted">Answer 16 short questions about how your company works today. You get your maturity level, a score for six areas, and the three actions that matter most for you.</p>
+      <ul class="facts">
+        <li><strong>4 minutes</strong></li>
+        <li><strong>6 areas:</strong> strategy, data, tools, people, governance, value</li>
+        <li><strong>Free</strong> personal report</li>
+      </ul>
+      <button class="btn" id="start-btn">Start the assessment</button>
+    </section>
+
+    <!-- 2. QUIZ -->
+    <section id="screen-quiz" hidden>
+      <div class="progress-row"><span id="q-count">Question 1 of 16</span><span id="q-part"></span></div>
+      <div class="progress"><div id="progress-fill"></div></div>
+      <div class="area" id="q-area"></div>
+      <h2 id="q-text"></h2>
+      <p class="help" id="q-help"></p>
+      <div class="options" id="q-options"></div>
+      <div class="quiz-nav"><button class="btn-quiet" id="back-btn">Previous question</button></div>
+    </section>
+
+    <!-- 3. GATE -->
+    <section id="screen-gate" hidden>
+      <h2>Your AI maturity level</h2>
+      <div class="score-line"><span class="level-name" id="gate-level"></span></div>
+      <div class="track" id="gate-track"></div>
+      <p class="muted" style="margin-top:20px">Your full report shows your score in each of the six areas and your three priority actions. We also email you a copy so you can share it with your team.</p>
+      <form id="lead-form" novalidate>
+        <label class="field">Full name
+          <input type="text" name="name" autocomplete="name" required maxlength="100">
+        </label>
+        <label class="field">Work email
+          <input type="email" name="email" autocomplete="email" required maxlength="150">
+        </label>
+        <label class="field">Company
+          <input type="text" name="company" autocomplete="organization" required maxlength="150">
+        </label>
+        <div class="hp" aria-hidden="true"><label>Website <input type="text" name="website" tabindex="-1" autocomplete="off"></label></div>
+        <label class="check"><input type="checkbox" name="consent" required>
+          <span id="consent-text">I agree that Your Company stores my answers and contact details to send me my report. Required.</span></label>
+        <label class="check"><input type="checkbox" name="marketing">
+          <span>Send me occasional practical tips about AI. Optional. I can unsubscribe at any time.</span></label>
+        <p class="note" id="form-error" hidden></p>
+        <div><button type="submit" class="btn" id="submit-btn">Show my full report</button></div>
+      </form>
+    </section>
+
+    <!-- 4. RESULTS -->
+    <section id="screen-results" hidden>
+      <h2>Your AI readiness report</h2>
+      <div class="score-line"><span class="score-big" id="r-score">0</span><span class="score-of">out of 100</span><span class="level-name" id="r-level"></span></div>
+      <div class="track" id="r-track"></div>
+      <p class="muted" id="r-level-desc" style="margin-top:20px"></p>
+      <p class="note" id="r-mail"></p>
+
+      <div class="section">
+        <h3>Your score by area</h3>
+        <div id="r-dims"></div>
+        <p class="note" id="r-dk" hidden></p>
+      </div>
+
+      <div class="section">
+        <h3>Your three priority actions</h3>
+        <ol class="actions" id="r-actions"></ol>
+      </div>
+
+      <div class="section">
+        <h3>Want help with the next step?</h3>
+        <p class="muted">Book a free 30-minute call. We go through your report together and agree on the first project worth doing.</p>
+        <a class="btn" id="book-btn" href="#" target="_blank" rel="noopener">Book a free call</a>
+        <div><button class="btn-quiet" id="retake-btn">Retake the assessment</button></div>
+      </div>
+    </section>
+  </main>
+  <footer>Your answers are used only to create your report. <a id="privacy-link" href="#">Read the privacy notice</a>.</footer>
+</div>
+
+<script>
+/* ===================== 1. SETTINGS: EDIT THESE ===================== */
+const CONFIG = {
+  brandName: "BaltDefCol",
+  appsScriptUrl: "https://script.google.com/macros/s/AKfycbwTKShLGXRbMHRriu2hSrUHtMPegrOgMSIqH6KjpIvXXQgfHNu0LqHYB4Fmf-0Xs_lBAQ/exec", // ends with /exec
+  bookingUrl: "https://outlook.office.com/bookwithme/user/74c4711420544659a0ddd5a78432594d@baltdefcol.org?anonymous&ep=bwmEmailSignature",
+  privacyUrl: "privacy.html"
+};
+
+/* ===================== 2. FRAMEWORK ===================== */
+const DIMENSIONS = [
+  { id: "strategy",   name: "Strategy" },
+  { id: "data",       name: "Data" },
+  { id: "tools",      name: "Tools" },
+  { id: "people",     name: "People" },
+  { id: "governance", name: "Governance" },
+  { id: "value",      name: "Value" }
+];
+
+// Each answer describes what people can observe in the company (0 = lowest, 3 = highest).
+const QUESTIONS = [
+  { id: "S1", dim: "strategy", text: "Who owns AI decisions in your company?",
+    help: "Think about who decides budget and priorities for AI.",
+    options: ["Nobody owns AI decisions.", "Each manager decides alone for their own team.", "One named leader owns AI, with a small budget.", "A senior sponsor owns AI, with a funded plan reviewed every quarter."] },
+  { id: "S2", dim: "strategy", text: "How do you choose which AI projects to do?",
+    help: "Think about the last AI idea that someone proposed.",
+    options: ["We have no AI projects yet.", "People try the tools they like.", "We rank ideas by business value and effort.", "Every project links to a business goal and has go/stop checkpoints."] },
+  { id: "D1", dim: "data", text: "When you need data for an important decision, what happens?",
+    help: "For example: sales by customer, costs by product, stock levels.",
+    options: ["The data is in spreadsheets or in people’s heads.", "The data exists, but combining it takes manual work.", "The main data is connected and each source has an owner.", "Data is central, documented and its quality is checked all the time."] },
+  { id: "D2", dim: "data", text: "How do AI tools get access to company data today?",
+    help: "Copying and pasting into a chatbot counts as access.",
+    options: ["They never use company data.", "People copy and paste data into AI tools.", "A few approved connections exist for some systems.", "Standard secure access, with permissions and logs."] },
+  { id: "T1", dim: "tools", text: "Which AI tools do employees use for work?",
+    help: "Include chat assistants, writing tools and AI features in your software.",
+    options: ["No AI tools are used officially.", "People use personal accounts without approval.", "Some teams have a company-approved AI tool.", "Everyone has approved tools, built into the main software they use."] },
+  { id: "T2", dim: "tools", text: "Is any AI solution part of daily operations?",
+    help: "“Daily operations” means real work, not a test or demo.",
+    options: ["No.", "Only tests and pilots.", "One or two solutions are used every day.", "Several solutions are live and they share common parts."] },
+  { id: "P1", dim: "people", text: "What AI training do employees get?",
+    help: "Think about the average employee, not the experts.",
+    options: ["No training.", "People learn on their own.", "Some teams get training.", "Training for every role, updated regularly."] },
+  { id: "P2", dim: "people", text: "A team wants to change a process with AI. What do managers usually do?",
+    help: "Be honest. Answer for most managers, not the best one.",
+    options: ["They say no, or that there is no time.", "They allow it, but give no support.", "They give time and some budget.", "They ask for it, and it is part of team goals."] },
+  { id: "G1", dim: "governance", text: "Do you have written rules for using AI at work?",
+    help: "For example: which data people may put into AI tools.",
+    options: ["No rules.", "Only our general IT rules.", "An AI policy exists, but few people know it.", "Everyone knows the rules. We check and update them."] },
+  { id: "G2", dim: "governance", text: "How do you check the risks of an AI tool before you use it?",
+    help: "Risks include privacy, wrong answers, bias and laws such as the EU AI Act.",
+    options: ["We do not check.", "Case by case, when someone asks.", "We use a short checklist for new tools.", "A formal review process with clear owners."] },
+  { id: "V1", dim: "value", text: "How do you measure the results of AI projects?",
+    help: "Results means business numbers, not opinions.",
+    options: ["We do not measure.", "We ask users if they like it.", "We track time or money saved on some projects.", "Each project has a starting number and a business target we review."] },
+  { id: "V2", dim: "value", text: "What happens after an AI solution goes live?",
+    help: "Think about who looks after it in month three.",
+    options: ["Nothing is live yet.", "Nobody owns it.", "An owner fixes problems when people report them.", "We track quality, cost and use, and improve it regularly."] }
+];
+
+// Not scored. They help you prioritise leads.
+const QUALIFIERS = [
+  { id: "role", text: "What is your role?", options: ["Owner or executive", "Manager or team lead", "IT, data or digital", "Other"] },
+  { id: "size", text: "How many people work in your company?", options: ["1–49", "50–249", "250–999", "1,000 or more"] },
+  { id: "goal", text: "What should AI help you with most in the next 12 months?", options: ["Lower costs", "Grow revenue", "Better customer experience", "Less risk and better compliance"] },
+  { id: "timeline", text: "When do you plan to act on AI?", options: ["In the next 3 months", "In 3 to 12 months", "Just exploring for now"] }
+];
+
+const LEVELS = [
+  { max: 25,  name: "Exploring",    desc: "AI is mostly ideas and personal experiments. The first win is to choose one owner and one useful project." },
+  { max: 50,  name: "Experimenting", desc: "You test AI in some places, but results are not repeatable yet. The next step is focus, rules and measurement." },
+  { max: 75,  name: "Operating",    desc: "AI already creates value in daily work. The next step is to scale what works and manage it well." },
+  { max: 100, name: "Transforming", desc: "AI is part of how you run the business. The next step is to protect quality and find new sources of value." }
+];
+
+// One action per area and per band: low (under 40), medium (40–69), high (70+).
+const ACTIONS = {
+  strategy: ["Name one leader who owns AI. Give them a few hours each week and a small budget.",
+             "Rank your AI ideas by value and effort. Keep the top two and stop the rest.",
+             "Review your AI projects every quarter. Stop the ones that do not move a business number."],
+  data:     ["List the five data sources that matter most. Give each one an owner.",
+             "Fix the quality of one key data source before you build AI on it.",
+             "Create one secure, standard way for AI tools to access data, with permissions and logs."],
+  tools:    ["Choose one approved AI tool for everyone. Stop putting company data into personal accounts.",
+             "Move your best pilot into daily work, with an owner and a go-live date.",
+             "Build reusable parts, like prompts and connectors, so new use cases go live faster."],
+  people:   ["Run a two-hour AI basics session for managers first. They set the example.",
+             "Give each team one practical AI use case and train them on it.",
+             "Add AI adoption to team goals and share wins between teams."],
+  governance: ["Write a one-page AI rule: which data is allowed in AI tools, and which is not.",
+               "Add a short risk checklist before any new AI tool is used. Check your duties under the EU AI Act if you work in the EU.",
+               "Check once a year that people follow your AI rules, and update them."],
+  value:    ["Before your next AI project, write down today’s number (time, cost or errors) so you can compare later.",
+             "Give every live AI solution an owner and a monthly check of use and results.",
+             "Report AI costs and benefits to leadership every quarter."]
+};
+
+/* ===================== 3. LOGIC ===================== */
+const STEPS = [
+  ...QUESTIONS.map(q => ({ ...q, kind: "scored" })),
+  ...QUALIFIERS.map(q => ({ ...q, kind: "qualifier" }))
+];
+let index = 0;
+let answers = {};
+let result = null;
+
+const $ = id => document.getElementById(id);
+
+function show(id) {
+  ["screen-intro", "screen-quiz", "screen-gate", "screen-results"].forEach(s => $(s).hidden = (s !== id));
+  window.scrollTo({ top: 0, behavior: "smooth" });
+  const h = $(id).querySelector("h1, h2");
+  if (h) { h.setAttribute("tabindex", "-1"); h.focus({ preventScroll: true }); }
+}
+
+function renderStep() {
+  const step = STEPS[index];
+  $("q-count").textContent = `Question ${index + 1} of ${STEPS.length}`;
+  $("q-part").textContent = step.kind === "scored" ? "" : "About your company";
+  $("progress-fill").style.width = `${(index / STEPS.length) * 100}%`;
+  $("q-area").textContent = step.kind === "scored" ? DIMENSIONS.find(d => d.id === step.dim).name : "Almost done";
+  $("q-text").textContent = step.text;
+  $("q-help").textContent = step.help || "";
+  $("q-help").hidden = !step.help;
+  $("back-btn").hidden = index === 0;
+
+  const box = $("q-options");
+  box.innerHTML = "";
+  const chosen = answers[step.id];
+  step.options.forEach((label, i) => box.appendChild(makeOption(label, i, false, chosen)));
+  if (step.kind === "scored") box.appendChild(makeOption("I don’t know", 0, true, chosen));
+}
+
+function makeOption(label, score, dk, chosen) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "opt" + (dk ? " dk" : "");
+  b.textContent = label;
+  b.setAttribute("aria-pressed", chosen && chosen.label === label ? "true" : "false");
+  b.addEventListener("click", () => choose(label, score, dk));
+  return b;
+}
+
+function choose(label, score, dk) {
+  const step = STEPS[index];
+  answers[step.id] = step.kind === "scored" ? { label, score, dk } : { label };
+  renderStep();
+  setTimeout(() => {
+    if (index < STEPS.length - 1) { index++; renderStep(); }
+    else { result = computeResult(); showGate(); }
+  }, 180);
+}
+
+function computeResult() {
+  const dims = {};
+  DIMENSIONS.forEach(d => {
+    const qs = QUESTIONS.filter(q => q.dim === d.id);
+    const sum = qs.reduce((s, q) => s + answers[q.id].score, 0);
+    dims[d.id] = Math.round((sum / (qs.length * 3)) * 100);
+  });
+  const total = QUESTIONS.reduce((s, q) => s + answers[q.id].score, 0);
+  const score = Math.round((total / (QUESTIONS.length * 3)) * 100);
+  const levelIndex = LEVELS.findIndex(l => score <= l.max);
+  const dontKnow = QUESTIONS.filter(q => answers[q.id].dk).map(q => q.text);
+
+  // Priority actions: the three weakest areas, each with the action for its band.
+  const order = DIMENSIONS.map((d, i) => ({ ...d, i, score: dims[d.id] }))
+    .sort((a, b) => a.score - b.score || a.i - b.i);
+  const weakest = order.slice(0, 3);
+  const actions = weakest.map(d => {
+    const band = d.score < 40 ? 0 : d.score < 70 ? 1 : 2;
+    return { dimension: d.name, text: ACTIONS[d.id][band] };
+  });
+  return { dims, score, levelIndex, level: LEVELS[levelIndex], dontKnow, weakest: weakest.map(d => d.name), actions };
+}
+
+function renderTrack(el, score, levelIndex) {
+  el.innerHTML = `
+    <div class="track-bar"><span></span><span></span><span></span><span></span><div class="marker" style="left:0%"></div></div>
+    <div class="track-labels">${LEVELS.map((l, i) => `<div class="${i === levelIndex ? "on" : ""}">${i + 1}. ${l.name}</div>`).join("")}</div>`;
+  requestAnimationFrame(() => requestAnimationFrame(() => {
+    el.querySelector(".marker").style.left = `${Math.min(Math.max(score, 1), 99)}%`;
+  }));
+}
+
+function showGate() {
+  $("gate-level").textContent = `Level ${result.levelIndex + 1}: ${result.level.name}`;
+  show("screen-gate");
+  renderTrack($("gate-track"), result.score, result.levelIndex);
+}
+
+async function submitLead(e) {
+  e.preventDefault();
+  const form = e.target;
+  const err = $("form-error");
+  err.hidden = true;
+  if (!form.checkValidity()) {
+    err.textContent = "Please fill in your name, a valid work email and your company, and tick the required box.";
+    err.hidden = false;
+    form.reportValidity();
+    return;
+  }
+  const fd = new FormData(form);
+  if (fd.get("website")) { showResults("", false); return; } // spam bot filled the hidden field
+
+  const btn = $("submit-btn");
+  btn.disabled = true;
+  btn.textContent = "Preparing your report…";
+
+  const qualifiers = {};
+  QUALIFIERS.forEach(q => qualifiers[q.id] = answers[q.id] ? answers[q.id].label : "");
+  const payload = {
+    name: fd.get("name").trim(),
+    email: fd.get("email").trim(),
+    company: fd.get("company").trim(),
+    consent: true,
+    marketing: fd.get("marketing") === "on",
+    score: result.score,
+    level: `Level ${result.levelIndex + 1}: ${result.level.name}`,
+    dimensions: result.dims,
+    weakest: result.weakest,
+    actions: result.actions,
+    dontKnowCount: result.dontKnow.length,
+    qualifiers,
+    answers: Object.fromEntries(QUESTIONS.map(q => [q.id, `${answers[q.id].score} – ${answers[q.id].label}`])),
+    page: location.href
+  };
+
+  let sent = false;
+  if (CONFIG.appsScriptUrl.startsWith("https://")) {
+    try {
+      await fetch(CONFIG.appsScriptUrl, {
+        method: "POST", mode: "no-cors",
+        headers: { "Content-Type": "text/plain;charset=utf-8" },
+        body: JSON.stringify(payload)
+      });
+      sent = true;
+    } catch (error) { console.error("Could not send answers:", error); }
+  } else {
+    console.warn("Demo mode: add your Apps Script URL in CONFIG to save answers.", payload);
+  }
+  showResults(payload.email, sent);
+}
+
+function showResults(email, sent) {
+  show("screen-results");
+  $("r-score").textContent = result.score;
+  $("r-level").textContent = `Level ${result.levelIndex + 1}: ${result.level.name}`;
+  $("r-level-desc").textContent = result.level.desc;
+  renderTrack($("r-track"), result.score, result.levelIndex);
+
+  const mail = $("r-mail");
+  mail.className = "note" + (sent ? " ok" : "");
+  mail.textContent = sent
+    ? `We are sending a copy of this report to ${email}. If you don’t see it in a few minutes, check your spam folder.`
+    : "We could not email you a copy. Take a screenshot or print this page to keep your report.";
+
+  const weakNames = result.weakest;
+  $("r-dims").innerHTML = "";
+  DIMENSIONS.forEach(d => {
+    const row = document.createElement("div");
+    row.className = "dim-row" + (weakNames.includes(d.name) ? " weak" : "");
+    const name = document.createElement("div"); name.textContent = d.name;
+    const bar = document.createElement("div"); bar.className = "dim-bar";
+    const fill = document.createElement("div"); fill.style.width = `${Math.max(result.dims[d.id], 2)}%`;
+    bar.appendChild(fill);
+    const val = document.createElement("div"); val.className = "dim-val"; val.textContent = result.dims[d.id];
+    row.append(name, bar, val);
+    $("r-dims").appendChild(row);
+  });
+
+  const dk = $("r-dk");
+  if (result.dontKnow.length) {
+    dk.textContent = `You answered “I don’t know” ${result.dontKnow.length} time${result.dontKnow.length > 1 ? "s" : ""}. This is a finding in itself: if leaders cannot see it, they cannot manage it. These answers count as zero.`;
+    dk.hidden = false;
+  } else dk.hidden = true;
+
+  $("r-actions").innerHTML = "";
+  result.actions.forEach(a => {
+    const li = document.createElement("li");
+    const wrap = document.createElement("div");
+    const tag = document.createElement("span"); tag.className = "tag"; tag.textContent = a.dimension;
+    const txt = document.createElement("span"); txt.textContent = a.text;
+    wrap.append(tag, txt);
+    li.appendChild(wrap);
+    $("r-actions").appendChild(li);
+  });
+}
+
+function restart() {
+  index = 0; answers = {}; result = null;
+  $("lead-form").reset();
+  $("submit-btn").disabled = false;
+  $("submit-btn").textContent = "Show my full report";
+  show("screen-intro");
+}
+
+/* ===================== 4. START ===================== */
+$("brand").textContent = CONFIG.brandName;
+$("consent-text").textContent = `I agree that ${CONFIG.brandName} stores my answers and contact details to send me my report. Required.`;
+$("book-btn").href = CONFIG.bookingUrl;
+$("privacy-link").href = CONFIG.privacyUrl;
+$("start-btn").addEventListener("click", () => { show("screen-quiz"); renderStep(); });
+$("back-btn").addEventListener("click", () => { if (index > 0) { index--; renderStep(); } });
+$("lead-form").addEventListener("submit", submitLead);
+$("retake-btn").addEventListener("click", restart);
+</script>
+</body>
+</html>
